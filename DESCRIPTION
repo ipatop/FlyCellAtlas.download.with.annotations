@@ -1,0 +1,11 @@
+Package: FlyCellAtlas.download.with.annotations
+Title: It read and process loom files from FlyCellAtlas to be compatible with Seurat
+Version: 0.0.0.9000
+Authors@R: 
+    person("Ines", "Patop", , "inespatop@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-2929-0860"))
+Description: It read and process loom files from FlyCellAtlas. I will run new analysis and do plots. and run new analysis
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
