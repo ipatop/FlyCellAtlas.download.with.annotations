@@ -21,4 +21,9 @@ Imports:
     scater,
     Seurat,
     SeuratDisk,
+    SeuratObject,
     tidyr
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

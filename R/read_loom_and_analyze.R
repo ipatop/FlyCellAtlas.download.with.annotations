@@ -1,7 +1,31 @@
 #function to get "not in" from %in% in dplyr
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
-read_loom_and_analyze<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loom", plot=T) {
+#' Read and process loom and H5AD files from FlyCellAtlas
+#'
+#'This function requires loom and h5ad files from FlyCellAtlas and process them into Seurat objects. It then also re-analyze them to get the full gene-expression matrix and not only the extract marker genes and also get further information.
+#'
+#' @param loom_file character with Name and directory of loom file -h5da has to be in same directory-
+#' @param plot Boolean indicating if plots should be generated
+#' @param dir Directory to save RData and plots in
+#'
+#' @return It saves old and new Seurat onjects along with marker genes and metadata.
+#'   *"_h5" is seurat object from the paper, this only has most variable genes
+#'
+#'   *"_new" is the new seurat object
+#'
+#'   *"_new_markers" is all.marker genes from the new seurat object with all genes
+#'
+#'   *"_paper_markers" is all.marker genes from the paper
+#'
+#'   *,"_matadata" is the metadata
+#' @export
+#'
+#' @examples
+#' There are examples in the folder names "./loom". To run it:
+#' read_loom_and_analyze(loom_file = "~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom")
+#'
+read_loom_and_analyze<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loom", plot=T, dir="./") {
 
   assertthat::assert_that(
     assertthat::see_if(assertthat::is.readable(loom_file))
@@ -48,7 +72,7 @@ read_loom_and_analyze<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loo
 
   #create plots with basic analysis
   if (plot){
-    grDevices::pdf(paste0("General_",nn,"_DimPlot_fromloom.pdf"))
+   pdf(paste0(dir,"/General_",nn,"_DimPlot_fromloom.pdf"))
     p=Seurat::DimPlot(loom_object_h5,repel = T,label = T,reduction = "umap",group.by = "annotation")+ NoLegend() + labs(title =  paste0("Clusters from loom ",nn))
     print(p)
     p=Seurat::DimPlot(loom_object_h5,reduction = "umap",group.by = "tissue")+ labs(title = paste0("tissue ",nn))
@@ -57,14 +81,13 @@ read_loom_and_analyze<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loo
     print(p)
     p=Seurat::DimPlot(loom_object_h5,reduction = "umap",group.by = "age")+ labs(title =  paste0("age ",nn))
     print(p)
-    grDevices::dev.off()
+    dev.off()
   }
 
-
-  #To be able to see any gene you are interested in you have to re-do the basic analysis from screatch. This is because the provided file only has most variable genes
+  #To be able to see any gene you are interested in you have to re-do the basic analysis from scratch. This is because the provided file only has most variable genes
 
   print("entering new seurat analysis")
-  #create new seurat
+  #create new Seurat
   new_seurat_obj <- SeuratObject::CreateSeuratObject(counts = reads_matrix)
   new_seurat_obj <- Seurat::NormalizeData(object = new_seurat_obj)
   new_seurat_obj <- Seurat::FindVariableFeatures(object = new_seurat_obj)
@@ -81,7 +104,8 @@ read_loom_and_analyze<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loo
 
   #Now we can see our new analysis
   if (plot){
-    grDevices::pdf(paste0(nn,"_DimPlot_newanalysis.pdf"))
+
+    grDevices::pdf(paste0(dir,"/DimPlot_",nn,"_newanalysis.pdf"))
 
     p=Seurat::DimPlot(new_seurat_obj,repel = T,label = T,reduction = "tsne")+ labs(title = nn)
     print(p)
@@ -93,7 +117,7 @@ read_loom_and_analyze<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loo
 
     print(p)
 
-    grDevices::dev.off()
+    dev.off()
   }
 
   print("calculting markers")
@@ -105,17 +129,16 @@ read_loom_and_analyze<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loo
   new_seurat_obj@active.ident<-as.factor(gsub(pattern = " ",replacement = "",new_seurat_obj$annotation))
   all.markers.paper<-Seurat::FindAllMarkers(new_seurat_obj,only.pos = T)
   #extract top10
-  top10markers <- all.markers.paper %>% dplyr::group_by(cluster) %>% dplyr::top_n(n = 10, wt = avg_log2FC)
-
+  top10markers <- all.markers.paper %>% group_by(cluster) %>%top_n(n = 10, wt = avg_log2FC)
 
   if(plot){
-    grDevices::pdf(paste0(nn,"_markers_plots",".pdf"),width = 15,height = 30)
+    pdf(paste0(dir,"/markers_plots_",nn,".pdf"),width = 15,height = 30)
 
     cluster.averages <- Seurat::AverageExpression(new_seurat_obj, return.seurat = TRUE, add.ident = "sex")
     p=Seurat::DoHeatmap(cluster.averages, features = top10markers$gene) + NoLegend()
     print(p)
 
-    grDevices::dev.off()
+    dev.off()
   }
 
   #now we rename the objects and save the data
@@ -127,13 +150,29 @@ read_loom_and_analyze<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loo
   assign(x = paste0(nn,"_matadata"),value = attr.df)
 
   #this will save the R objects
-  save(list = ls(pattern = paste0("^",nn)),file = paste0("data_",nn,".RData"))
+  save(list = ls(pattern = paste0("^",nn)),file = paste0(dir,"/data_",nn,".RData"))
 
   #rm(list =c("loom_object_h5","new_seurat_obj","cluster.averages","all.markers.new","all.markers.paper","newdata","x","reads_matrix","loom_object","attr.df") )
 
 }
 
 
+
+#' Read and process loom and H5AD files from FlyCellAtlas
+#'
+#'This function requires loom and h5ad files from FlyCellAtlas and process them into Seurat objects.
+#'
+#' @param loom_file character with Name and directory of loom file -h5da has to be in same directory-
+#' @param plot Boolean indicating if plots should be generated
+#' @param dir Directory to save RData and plots in
+#'
+#' @return Seurat object from paper without any further processing
+#' @export
+#'
+#' @examples
+#' There are examples in the folder names "./loom". To run it:
+#' loom_to_seurat(loom_file = "~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom")
+#'
 loom_too_Seurat<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loom", plot=T) {
 
 
@@ -176,28 +215,51 @@ loom_too_Seurat<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loom", pl
   #attach meta data
   loom_object_h5@meta.data=cbind(loom_object_h5@meta.data,attr.df)
 
-  #create name for file and plots
-  nn=gsub(pattern = "s_fca_biohub_",replacement = "",basename(loom_file))
-  nn=gsub(pattern = "_10x.loom",replacement = "",nn)
+
 
   #create plots with basic analysis
   if (plot){
-    grDevices::pdf(paste0("General_",nn,"_DimPlot_fromloom.pdf"))
-    p=Seurat::DimPlot(loom_object_h5,repel = T,label = T,reduction = "umap",group.by = "annotation")+ NoLegend() + labs(title =  paste0("Clusters from loom ",nn))
+    pdf(paste0(dir,"/General_",nn,"_DimPlot_fromloom.pdf"))
+    p=DimPlot(loom_object_h5,repel = T,label = T,reduction = "umap",group.by = "annotation")+ NoLegend() + labs(title =  paste0("Clusters from loom ",nn))
     print(p)
-    p=Seurat::DimPlot(loom_object_h5,reduction = "umap",group.by = "tissue")+ labs(title = paste0("tissue ",nn))
+    p=DimPlot(loom_object_h5,reduction = "umap",group.by = "tissue")+ labs(title = paste0("tissue ",nn))
     print(p)
-    p=Seurat::DimPlot(loom_object_h5,reduction = "umap",group.by = "sex")+ labs(title =  paste0("sex ",nn))
+    p=DimPlot(loom_object_h5,reduction = "umap",group.by = "sex")+ labs(title =  paste0("sex ",nn))
     print(p)
-    p=Seurat::DimPlot(loom_object_h5,reduction = "umap",group.by = "age")+ labs(title =  paste0("age ",nn))
+    p=DimPlot(loom_object_h5,reduction = "umap",group.by = "age")+ labs(title =  paste0("age ",nn))
     print(p)
-    grDevices::dev.off()
+    dev.off()
   }
-
   return(loom_object_h5)
 }
 
-loom_too_Seurat_brandNew<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loom", plot=T,preprocesing=T) {
+
+#' Read and process loom and H5AD files from FlyCellAtlas
+#'
+#'This function requires loom and h5ad files from FlyCellAtlas and process them into Seurat objects. It creates a new object form scratch and tranfere celltype assignment
+#'
+#' @param loom_file character with Name and directory of loom file -h5da has to be in same directory-
+#' @param plot Boolean indicating if plots should be generated
+#' @param dir Directory to save plots in
+#' @param preprocesing Boolean indicating if preprocessing should be done (ie. findVariableFeatues, Scale Data, etc) or not
+#'
+#' @return It saves old and new Seurat onjects along with marker genes and metadata.
+#'   *"_h5" is seurat object from the paper, this only has most variable genes
+#'
+#'   *"_new" is the new seurat object
+#'
+#'   *"_new_markers" is all.marker genes from the new seurat object with all genes
+#'
+#'   *"_paper_markers" is all.marker genes from the paper
+#'
+#'   *,"_matadata" is the metadata
+#' @export
+#'
+#' @examples
+#' There are examples in the folder names "./loom". To run it:
+#' loom_too_Seurat_brandNew(loom_file = "~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom")
+#'
+loom_too_Seurat_brandNew<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.loom", plot=T,preprocesing=T,dir="./") {
   assertthat::assert_that(
     assertthat::see_if(assertthat::is.readable(loom_file))
   )
@@ -243,7 +305,7 @@ loom_too_Seurat_brandNew<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.
 
   #create plots with basic analysis
   if (plot){
-    grDevices::pdf(paste0("General_",nn,"_DimPlot_fromloom.pdf"))
+   pdf(paste0(dir,"/General_",nn,"_DimPlot_fromloom.pdf"))
     p=Seurat::DimPlot(loom_object_h5,repel = T,label = T,reduction = "umap",group.by = "annotation")+ NoLegend() + labs(title =  paste0("Clusters from loom ",nn))
     print(p)
     p=Seurat::DimPlot(loom_object_h5,reduction = "umap",group.by = "tissue")+ labs(title = paste0("tissue ",nn))
@@ -252,7 +314,7 @@ loom_too_Seurat_brandNew<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.
     print(p)
     p=Seurat::DimPlot(loom_object_h5,reduction = "umap",group.by = "age")+ labs(title =  paste0("age ",nn))
     print(p)
-    grDevices::dev.off()
+    dev.off()
   }
 
 
@@ -278,7 +340,7 @@ loom_too_Seurat_brandNew<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.
 
     #Now we can see our new analysis
     if (plot){
-      grDevices::pdf(paste0(nn,"_DimPlot_newanalysis.pdf"))
+      pdf(paste0(nn,"_DimPlot_newanalysis.pdf"))
 
       p=Seurat::DimPlot(new_seurat_obj,repel = T,label = T,reduction = "tsne")+ labs(title = nn)
       print(p)
@@ -290,9 +352,29 @@ loom_too_Seurat_brandNew<-function(loom_file="./loom/s_fca_biohub_body_wall_10x.
 
       print(p)
 
+      dev.off()
+    }
+
+}
+
+    new_seurat_obj@meta.data=cbind(new_seurat_obj@meta.data,attr.df)
+
+    #Now we can see our new analysis
+    if (plot){
+      grDevices::pdf(paste0(dir,"/DimPlot_",nn,"_newanalysis.pdf"))
+
+      p=Seurat::DimPlot(new_seurat_obj,repel = T,label = T,reduction = "tsne")+ ggplot2::labs(title = nn)
+      print(p)
+      p=Seurat::DimPlot(new_seurat_obj,repel = T,label = T,reduction = "tsne", group.by = "annotation")+ Seurat::NoLegend() + ggplot2::labs(title = nn)
+      print(p)
+      p=Seurat::DimPlot(new_seurat_obj,repel = T,label = T,reduction = "umap")+ ggplot2::labs(title = nn)
+      print(p)
+      p=Seurat::DimPlot(new_seurat_obj,repel = T,label = T,reduction = "umap", group.by = "annotation")+ Seurat::NoLegend() + ggplot2::labs(title = nn)
+
+      print(p)
+
       grDevices::dev.off()
     }
-  }
   return(new_seurat_obj)
 
 }

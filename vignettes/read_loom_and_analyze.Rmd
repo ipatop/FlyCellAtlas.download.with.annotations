@@ -1,0 +1,25 @@
+---
+title: "Read loom from FlyCellAtlas and analyze"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Read loom from FlyCellAtlas and analyze}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(FlyCellAtlas.download.with.annotations)
+```
+
+Examples to run the data are in 
+```{r}
+
+```
+
