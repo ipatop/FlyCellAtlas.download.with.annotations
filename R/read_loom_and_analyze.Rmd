@@ -1,0 +1,73 @@
+---
+title: "Read loom from FlyCellAtlas and analyze"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Read loom from FlyCellAtlas and analyze}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+#devtools::install_github("ipatop/FlyCellAtlas.download.with.annotations")
+library(FlyCellAtlas.download.with.annotations)
+```
+
+*General*
+
+This package is designed to analyze the data from the [FlyCellAtlas](https://flycellatlas.org)
+
+*Dependencies* 
+
+This packages depends on the following packages, they should be loaded automatically but just in case if you want you can load them manually
+
+```
+library("assertthat")
+library("Seurat")
+library("SeuratDisk")
+library("grDevices")
+library("ggplot2")
+library("hdf5r")
+library("loomR")
+library("scater")
+library("patchwork")
+library("SeuratObject")
+library("dplyr")
+library("tidyr")
+library("cowplot")
+```
+
+*Run examples*
+Examples to run the data are in the folder ../loom. You will notice that you will need both the loom and the h5da files from the FlyBaseAtlas
+
+This package has 3 functions:
+
+*read_loom_and_analyze*
+```
+read_loom_and_analyze(loom_file = "~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom")
+```
+
+This will read the loom files, create a new seurat object and run the general normalization etc. It will save the data and plots into a new RData file
+
+
+*loom_too_Seurat_brandNew*
+```
+bopdywall_new<-loom_too_Seurat_brandNew(loom_file = "~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom")
+```
+
+This will read the loom files, and just create a NEW Seurat object ALL genes and do further analysis if you want to
+
+
+*loom_to_seurat*
+```
+bopdywall_old<-loom_to_seurat(loom_file = "~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom")
+```
+
+This will read the loom files, and just create a Seurat object with only most variable genes and everything as it comes form the paper
+
