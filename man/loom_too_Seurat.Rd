@@ -4,10 +4,16 @@
 \alias{loom_too_Seurat}
 \title{Read and process loom and H5AD files from FlyCellAtlas}
 \usage{
-loom_too_Seurat(loom_file = "./loom/s_fca_biohub_body_wall_10x.loom", plot = T)
+loom_too_Seurat(
+  loom_file = "./loom/s_fca_biohub_body_wall_10x.loom",
+  h5ad_file = "./loom/s_fca_biohub_body_wall_10x.h5ad",
+  plot = T
+)
 }
 \arguments{
 \item{loom_file}{character with Name and directory of loom file -h5da has to be in same directory-}
+
+\item{h5ad_file}{character with Name and directory of h5da file}
 
 \item{plot}{Boolean indicating if plots should be generated}
 

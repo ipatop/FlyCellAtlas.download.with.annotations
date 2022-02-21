@@ -143,9 +143,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#devtools::install_github(&quot;ipatop/FlyCellAtlas.download.with.annotations&quot;)</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FlyCellAtlas.download.with.annotations)</span></code></pre></div>
-<p><em>General</em></p>
+<div id="general" class="section level2">
+<h2>General</h2>
 <p>This package is designed to analyze the data from the <a href="https://flycellatlas.org">FlyCellAtlas</a></p>
-<p><em>Dependencies</em></p>
+</div>
+<div id="dependencies" class="section level2">
+<h2>Dependencies</h2>
 <p>This packages depends on the following packages, they should be loaded automatically but just in case if you want you can load them manually</p>
 <pre><code>library(&quot;assertthat&quot;)
 library(&quot;Seurat&quot;)
@@ -160,17 +163,22 @@ library(&quot;SeuratObject&quot;)
 library(&quot;dplyr&quot;)
 library(&quot;tidyr&quot;)
 library(&quot;cowplot&quot;)</code></pre>
-<p><em>Run examples</em> Examples to run the data are in the folder ../loom. You will notice that you will need both the loom and the h5da files from the FlyBaseAtlas</p>
-<p>This package has 3 functions:</p>
-<p><em>read_loom_and_analyze</em></p>
-<pre><code>read_loom_and_analyze(loom_file = &quot;~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom&quot;)</code></pre>
-<p>This will read the loom files, create a new seurat object and run the general normalization etc. It will save the data and plots into a new RData file</p>
-<p><em>loom_too_Seurat_brandNew</em></p>
-<pre><code>bopdywall_new&lt;-loom_too_Seurat_brandNew(loom_file = &quot;~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom&quot;)</code></pre>
-<p>This will read the loom files, and just create a NEW Seurat object ALL genes and do further analysis if you want to</p>
-<p><em>loom_to_seurat</em></p>
-<pre><code>bopdywall_old&lt;-loom_to_seurat(loom_file = &quot;~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom&quot;)</code></pre>
-<p>This will read the loom files, and just create a Seurat object with only most variable genes and everything as it comes form the paper</p>
+</div>
+<div id="run-example-data" class="section level2">
+<h2>Run example data</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Files are in https://flycellatlas.org</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Here we download the body wall 10X loom and h5ad</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(<span class="at">url =</span> <span class="st">&quot;https://cloud.flycellatlas.org/index.php/s/egxzns8NgtCjonB/download&quot;</span>,<span class="at">destfile =</span> <span class="st">&quot;./bodywall.loom&quot;</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(<span class="at">url =</span> <span class="st">&quot;https://cloud.flycellatlas.org/index.php/s/sZZMSbcNk4SWtHE/download&quot;</span>,<span class="at">destfile =</span> <span class="st">&quot;./bodywall.h5ad&quot;</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>loom_file<span class="ot">&lt;-</span><span class="st">&quot;./bodywall.loom&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>h5ad_file<span class="ot">&lt;-</span><span class="st">&quot;./bodywall.h5ad&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">## basic example code to create a new Seurat object with annotations from FlyCellAtlas</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>bodywall_new<span class="ot">&lt;-</span><span class="fu">loom_too_Seurat_brandNew</span>(<span class="at">loom_file =</span>loom_file,<span class="at">h5ad_file=</span>h5ad_file)</span></code></pre></div>
+<p>Now <code>bodywall_new</code> is a Seurat object we can not plot etc</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(bodywall_new,<span class="at">repel =</span> T,<span class="at">label =</span> T,<span class="at">reduction =</span> <span class="st">&quot;umap&quot;</span>, <span class="at">group.by =</span> <span class="st">&quot;annotation&quot;</span>)<span class="sc">+</span> <span class="fu">NoLegend</span>()</span></code></pre></div>
+</div>
 
 
 

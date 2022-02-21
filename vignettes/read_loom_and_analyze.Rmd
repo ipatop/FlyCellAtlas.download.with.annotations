@@ -19,11 +19,11 @@ knitr::opts_chunk$set(
 library(FlyCellAtlas.download.with.annotations)
 ```
 
-*General*
+## General
 
 This package is designed to analyze the data from the [FlyCellAtlas](https://flycellatlas.org)
 
-*Dependencies* 
+## Dependencies
 
 This packages depends on the following packages, they should be loaded automatically but just in case if you want you can load them manually
 
@@ -42,32 +42,24 @@ library("dplyr")
 library("tidyr")
 library("cowplot")
 ```
+## Run example data
 
-*Run examples*
-Examples to run the data are in the folder ../loom. You will notice that you will need both the loom and the h5da files from the FlyBaseAtlas
+``` r
+#Files are in https://flycellatlas.org
+# Here we download the body wall 10X loom and h5ad
+download.file(url = "https://cloud.flycellatlas.org/index.php/s/egxzns8NgtCjonB/download",destfile = "./bodywall.loom")
+download.file(url = "https://cloud.flycellatlas.org/index.php/s/sZZMSbcNk4SWtHE/download",destfile = "./bodywall.h5ad")
 
-This package has 3 functions:
-
-*read_loom_and_analyze*
-```
-read_loom_and_analyze(loom_file = "~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom")
-```
-
-This will read the loom files, create a new seurat object and run the general normalization etc. It will save the data and plots into a new RData file
-
-
-*loom_too_Seurat_brandNew*
-```
-bopdywall_new<-loom_too_Seurat_brandNew(loom_file = "~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom")
+loom_file<-"./bodywall.loom"
+h5ad_file<-"./bodywall.h5ad"
+## basic example code to create a new Seurat object with annotations from FlyCellAtlas
+bodywall_new<-loom_too_Seurat_brandNew(loom_file =loom_file,h5ad_file=h5ad_file)
 ```
 
-This will read the loom files, and just create a NEW Seurat object ALL genes and do further analysis if you want to
+Now `bodywall_new` is a Seurat object we can not plot etc
 
+``` r
 
-*loom_to_seurat*
+DimPlot(bodywall_new,repel = T,label = T,reduction = "umap", group.by = "annotation")+ NoLegend()
+
 ```
-bopdywall_old<-loom_to_seurat(loom_file = "~/Documents/scripts/FlyCellAtlas_download_with_annotations/loom/s_fca_biohub_body_wall_10x.loom")
-```
-
-This will read the loom files, and just create a Seurat object with only most variable genes and everything as it comes form the paper
-
